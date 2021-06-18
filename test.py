@@ -1,11 +1,11 @@
-from tasks import say_hello
+from tasks import read_reddit
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--name", default="eunho")
+parser.add_argument("--sub", default="alpp")
 args = parser.parse_args()
 
 
-result = say_hello.delay(f"{args.name}")
-print(result)
+result = read_reddit.delay(f"{args.sub}")
+print(result.get())
 
