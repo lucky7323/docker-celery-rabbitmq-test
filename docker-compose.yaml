@@ -2,6 +2,7 @@ version: "3"
 services:
   rabbitmq:
     image: rabbitmq:latest
+    container_name: rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
@@ -10,30 +11,39 @@ services:
 
   redis:
     image: redis:latest
+    container_name: redis
     ports:
       - "6379:6379"
 
   celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: ['celery', 'worker', '-A', 'app.tasks', '-l', 'INFO']
+    build: .
+    container_name: celery
+    command: ['celery', '-A', 'app.tasks', 'worker', '-l', 'INFO']
     environment:
-      - CELERY_BROKER=amqp://guest:guest@rabbitmq:5672//
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - C_FORCE_ROOT=true
+     - C_FORCE_ROOT=true
     volumes:
       - ./:/app/
     depends_on:
       - rabbitmq
       - redis
+      - rproxy
 
   rproxy:
     hostname: rproxy
     image: mattes/rotating-proxy:latest
+    container_name: rproxy
     environment:
       - tors=25
     ports:
       - "5566:5566"
       - "4444:4444"
 
+  worker:
+    build:
+      context: .
+      dockerfile: run
+    container_name: worker
+    volumes:
+      - ./:/app/
+    depends_on:
+      - celery
