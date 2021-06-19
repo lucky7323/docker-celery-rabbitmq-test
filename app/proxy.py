@@ -4,7 +4,7 @@ import requests
 
 def get_session():
     session = requests.session()
-    session.proxies = {'http': 'localhost:5566', 'https': 'localhost:5566'}
+    session.proxies = {'http': 'rproxy:5566', 'https': 'rproxy:5566'}
     session.headers = get_header()
     return session
 
